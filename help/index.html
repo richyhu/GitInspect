@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>帮助中心 | 克隆仓库与添加 API 令牌</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <h1>帮助中心</h1>
+      <nav class="nav">
+        <a href="#clone">克隆仓库</a>
+        <a href="#token">添加 API 令牌</a>
+        <a href="/apsd/index.html" target="_blank" rel="noopener">打开主页面</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section id="clone" class="card">
+        <h2>如何克隆仓库</h2>
+        <p>你可以通过 HTTPS 或 SSH 两种方式克隆仓库。填写仓库信息后，可一键复制对应命令。</p>
+
+        <div class="form-row">
+          <label>仓库所有者（owner）</label>
+          <input id="ownerInput" type="text" placeholder="例如：vercel" />
+        </div>
+        <div class="form-row">
+          <label>仓库名（repo）</label>
+          <input id="repoInput" type="text" placeholder="例如：next.js" />
+        </div>
+
+        <div class="cmd-block">
+          <div class="cmd-header">
+            <span>HTTPS 方式</span>
+            <button class="btn btn-secondary" data-copy="#httpsCmd">复制</button>
+          </div>
+          <code id="httpsCmd">git clone https://github.com/&lt;owner&gt;/&lt;repo&gt;.git</code>
+        </div>
+
+        <div class="cmd-block">
+          <div class="cmd-header">
+            <span>SSH 方式</span>
+            <button class="btn btn-secondary" data-copy="#sshCmd">复制</button>
+          </div>
+          <code id="sshCmd">git clone git@github.com:&lt;owner&gt;/&lt;repo&gt;.git</code>
+        </div>
+
+        <div class="tip">
+          提示：在主页面中搜索 <code>owner/repo</code> 后，顶部“克隆信息”区域也提供复制按钮与 HTTPS/SSH 切换。
+        </div>
+      </section>
+
+      <section id="token" class="card">
+        <h2>如何添加 GitHub API 令牌</h2>
+        <ol class="steps">
+          <li>打开 GitHub → 右上角头像 → <strong>Settings</strong>（设置）。</li>
+          <li>左侧导航最下方进入 <strong>Developer settings</strong> → <strong>Personal access tokens</strong>。</li>
+          <li>选择 <strong>Fine-grained tokens</strong> 或 <strong>Tokens (classic)</strong> 并创建令牌。</li>
+          <li>若需要访问私有仓库，请在 Classic 模式勾选 <code>repo</code>；仅公共仓库可勾选 <code>public_repo</code>。</li>
+          <li>生成令牌后，复制保存（GitHub 只显示一次）。</li>
+          <li>返回主页面，找到 “GitHub API 令牌” 输入框，粘贴令牌并点击 <strong>保存</strong> 或 <strong>测试令牌</strong>。</li>
+        </ol>
+        <div class="tip">
+          令牌保存在浏览器的本地存储中，只有你自己可见。若遇到访问限流（如 403），建议添加令牌后重试。
+        </div>
+        <div class="actions">
+          <a class="btn" href="/apsd/index.html" target="_blank" rel="noopener">前往主页面设置令牌</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>© 帮助中心 · 提升仓库浏览与下载体验</p>
+    </footer>
+
+    <script src="./script.js"></script>
+  </body>
+  </html>

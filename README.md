@@ -1,54 +1,102 @@
-# GitInspect
+# 面向不熟悉 GitHub 用户的仓库浏览与下载工具
 
-## 包含内容
-- `src/` 应用源代码（TypeScript/React/Vite）
-- `help/` 辅助静态页面（克隆与令牌指南）
-- 根配置与入口：`index.html`、`package.json`、`tsconfig.json`、`vite.config.ts`、`tailwind.config.js`、`postcss.config.js`
-- 锁文件：`pnpm-lock.yaml`、`package-lock.json`（任选其一即可，保留不影响）
+本项目面向不熟悉或未使用过 GitHub 的用户。无需命令行与 Git 知识，使用浏览器即可浏览仓库、选择文件并打包下载，同时提供将本项目以网页方式上传至个人 GitHub 仓库的操作指引。
 
-## 排除内容
-- `dist/` 与 `apsd/` 等构建或导出文件夹
-- `node_modules/` 与临时缓存
-- IDE 配置与系统文件
+#### 目标用户与设计原则
+- 目标用户：不会使用 GitHub 的人群（非开发者/新手/不熟悉命令行）。
+- 设计原则：纯浏览器操作、无需命令行、提供网页上传与可视化进度。
 
-> 以上排除规则已写入 `GitHub/.gitignore`。
+### 定位与特点
+- 全程网页操作，无需命令行与 Git 基础。
+- 支持一键下载全部或选择性下载，并显示下载进度。
+- 提供通过网页上传至个人 GitHub 仓库的图文指南，无需本地 Git 操作。
+- 公共仓库通常无需令牌；在访问受限或访问私有仓库时可使用个人访问令牌（PAT）。
 
-## 本地启动（开发模式）
-- 使用 npm：
-  ```bash
-  npm install
-  npm run dev
-  ```
-- 使用 pnpm：
-  ```bash
-  pnpm install
-  pnpm dev
-  ```
+## 功能概述
+- 在网页里浏览仓库文件树，勾选需要的文件或文件夹，打包成一个 ZIP 下载。
+- 也可以一键“下载全部”。遇到网站限制时，会自动跳到 GitHub 的官方下载页面。
+- 可以设置 GitHub 的“个人访问令牌”（PAT），解决访问受限、支持私有仓库（令牌只保存在你的浏览器）。
 
-启动后在浏览器打开本地地址（例如 Vite 提示的 `http://localhost:5173/`）。
+---
 
-## GitHub API 令牌
-- 若访问 GitHub API 受限或需要访问私有仓库，请在应用主页面设置个人访问令牌（PAT）。
-- 令牌创建路径：GitHub → Settings → Developer settings → Personal access tokens。
-- Classic 模式：私有仓库勾选 `repo`；公共仓库可勾选 `public_repo`。
+## 快速开始（无需命令行）
 
-## 推送到 GitHub（示例流程）
-在终端执行：
-```bash
-cd GitHub
-# 初始化仓库
-git init
-# 添加远程（替换为你的仓库地址）
-git remote add origin https://github.com/<your-username>/<your-repo>.git
-# 提交
-git add .
-git commit -m "Initial source upload"
-# 设置主分支并推送
-git branch -M main
-git push -u origin main
-```
+你只需两步，把本项目传到你的 GitHub：
 
-## 其它说明
-- 如需单文件预览或构建产物，请在根目录执行构建并在 `dist/` 中查看；本目录不包含构建结果。
-- 若你只使用 npm 或只使用 pnpm，可删除另一种锁文件以避免混用。
+1）通过网页创建空仓库
+- 打开 https://github.com/ 并登录
+- 右上角“+” → 选择 “New repository”
+- 填写仓库名（随便，例如 `my-repo-browser`）→ 点击 “Create repository”
 
+2）通过网页上传本项目文件
+- 进入你新建的仓库页面
+- 点击 “uploading an existing file” 或 “Add file → Upload files”
+- 打开你电脑里的这个文件夹：`/Users/anna/Downloads/319309796866/GitHub`
+- 把里面的所有文件和文件夹（如 `src/`、`help/`、`package.json` 等）拖到网页里
+- 页面底部填写提交说明（比如 `Initial upload`）→ 点击 “Commit changes” 即完成上传！
+
+> 说明：上述流程无需使用命令行，不会影响本地原始项目。
+
+---
+
+## 本地运行
+1) 安装 Node.js（如果还没装）
+- 打开 https://nodejs.org/ 下载并安装稳定版（LTS），一路“下一步”即可。
+
+2) 进入项目并启动
+- 终端执行：
+  - 使用 npm：
+    ```bash
+    cd GitHub
+    npm install
+    npm run dev
+    ```
+  - 使用 pnpm：
+    ```bash
+    cd GitHub
+    pnpm install
+    pnpm dev
+    ```
+- 终端会提示一个本地地址（例如 `http://localhost:5173/`），用浏览器打开即可。
+
+3）帮助页面
+- 打开 `help/index.html`（本项目自带的帮助页面）。
+- 内含一键生成“克隆命令”和“创建令牌”的图文步骤。
+
+---
+
+## 下载方式
+- 下载全部：点击页面里的“下载全部”。如果浏览器提示限制，会自动打开 GitHub 官方下载页。
+- 选择性下载：在文件树里勾选你需要的文件或文件夹，再点击“下载所选”。支持递归打包，过程会显示进度。
+
+## 关于个人访问令牌（PAT）
+- 令牌是访问 GitHub 的小钥匙。设置后：访问更稳定、更少限制；还能访问私有仓库。
+- 创建方法（网页操作）：GitHub → 头像 → Settings → Developer settings → Personal access tokens → 生成令牌。
+- 如果只是看公共仓库，通常不需要令牌；遇到“限流”“失败”再加也行。
+- 令牌仅存储于浏览器本地，不会上传到服务器或第三方。
+
+---
+
+## 常见问题
+- 不会命令行：用“网页上传”即可，见上面的两步。
+- 下载失败或受限：先试“下载全部”；若跳到 GitHub 页面，照着页面下载 ZIP 即可。
+- npm 和 pnpm 选哪个：二选一都行。如果没用过，选 npm。
+- Windows/Mac 都能用吗：可以。本说明里给的是通用步骤。
+- 项目里为什么没有 `dist/`：这是“只含源代码”的版本，上传更干净。需要构建时运行 `npm run build` 即可生成。
+
+---
+
+## 术语说明
+- 仓库（Repository）：代码的“网盘”，放在 GitHub 上。
+- 克隆（Clone）：把仓库复制到你的电脑。
+- 提交（Commit）：把你的更改保存到仓库的历史里。
+- 分支（Branch）：同一个仓库里的多条“开发线”，常见的是 `main`。
+
+---
+
+## 贡献指南
+- 欢迎直接提 Issue 或 Pull Request。
+- 推荐流程：Fork → 新建分支（`feat/xxx` 或 `fix/xxx`）→ 修改代码 → 发起 PR 并说明改动。
+
+## 许可证
+- 本项目使用 MIT 许可证。你可以自由使用、修改和分发，遵守 MIT 条款即可。

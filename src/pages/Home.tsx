@@ -4,9 +4,10 @@ import { useTheme } from '@/hooks/useTheme';
 // 导入必要的库和组件
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { Github, Moon, Sun, Search, Copy, ExternalLink, FileText, Code, Globe, FileCheck, Book, ChevronDown, ChevronRight, Star, GitBranch, Users, Key, Globe as GlobeIcon, X, History, Eye, EyeOff, Trash2, Download, CheckSquare, Square, Info } from 'lucide-react';
+import { Github, Moon, Sun, Search, Copy, ExternalLink, FileText, Code, Globe, FileCheck, Book, ChevronDown, ChevronRight, Star, GitBranch, Users, Key, Globe as GlobeIcon, X, History, Eye, EyeOff, Trash2, Download, CheckSquare, Square, Info, Tag } from 'lucide-react';
 import { marked } from 'marked';
 import React from 'react';
+import { useReleases, buildSourceArchiveUrl } from '@/hooks/useReleases';
 
 // 仓库数据类型定义
 interface License {
@@ -43,6 +44,8 @@ interface FileTreeNode {
 // GitHub API 相关配置
 const GITHUB_API_BASE_URL = 'https://api.github.com';
 const GITHUB_RAW_BASE_URL = 'https://raw.githubusercontent.com';
+// 公用令牌（仅作为请求的后备值，不在UI显示或本地存储）
+const PUBLIC_GITHUB_TOKEN = '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';
 
 // 添加超时处理的fetch包装函数
 const fetchWithTimeout = async (resource: string, options: Record<string, any> = {}, timeout: number = 10000) => {
@@ -154,15 +157,13 @@ const parseGitHubInput = (input: string): string | null => {
   return null;
 };
 
-// 构建API请求头
+// 构建API请求头（在未提供令牌时使用公用令牌作为后备）
 const getHeaders = (apiToken: string = '') => {
   const headers: Record<string, string> = {
     'Accept': 'application/vnd.github.v3+json'
   };
-  
-  if (apiToken) {
-    headers['Authorization'] = `token ${apiToken}`;
-  }
+  const effective = apiToken && apiToken.trim() ? apiToken.trim() : PUBLIC_GITHUB_TOKEN;
+  if (effective) headers['Authorization'] = `token ${effective}`;
   
   return headers;
 };
@@ -728,6 +729,24 @@ export default function Home() {
   // 多语言README相关状态
   const [availableReadmes, setAvailableReadmes] = useState<Array<{name: string, path: string}>>([]);
   const [selectedReadme, setSelectedReadme] = useState<string>('README.md');
+
+  // 返回首页：重置所有与仓库相关的状态
+  const resetToHome = () => {
+    setRepoInput('');
+    setRepoData(null);
+    setReadmeContent('');
+    setLicenseContent('');
+    setFileTree([]);
+    setIsLoading(false);
+    setError(null);
+    setActiveTab('overview');
+    setAvailableReadmes([]);
+    setSelectedReadme('README.md');
+    setShowTokenInput(false);
+    setRevealToken(false);
+    setShowSuggestions(false);
+    setHighlightIndex(-1);
+  };
   
   // 构建API请求头（使用已在文件顶部定义的函数，这里保留引用以便参数传递）
   // 注意：getHeaders 函数已在文件顶部定义，这里通过参数传递当前组件的apiToken状态
@@ -1058,6 +1077,7 @@ export default function Home() {
   const tabs = [
     { id: 'overview', label: '概览' },
     { id: 'files', label: '文件' },
+    { id: 'releases', label: '发行版' },
     { id: 'clone', label: '克隆' }
   ];
   
@@ -1112,10 +1132,15 @@ export default function Home() {
       {/* 头部 */}
       <header className="sticky top-0 z-10 bg-white dark:bg-gray-900 shadow-sm">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center">
+          <button
+            type="button"
+            onClick={resetToHome}
+            className="flex items-center select-none cursor-pointer hover:opacity-90"
+            aria-label="返回首页"
+          >
             <Github className="h-6 w-6 mr-2 text-blue-600 dark:text-blue-400" />
             <h1 className="text-xl font-bold">GitHub 仓库浏览器</h1>
-          </div>
+          </button>
           <button
             onClick={toggleTheme}
             className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800"
@@ -1520,6 +1545,17 @@ export default function Home() {
                    <FileTree files={fileTree} owner={repoData.owner} repo={repoData.name} apiToken={apiToken} />
                 </div>
               )}
+
+              {/* 发行版标签内容 */}
+              {activeTab === 'releases' && (
+                <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-800">
+                  <h3 className="text-xl font-bold mb-4 flex items-center">
+                    <Tag className="h-5 w-5 mr-2" />
+                    发行版
+                  </h3>
+                  <ReleasesPanel owner={repoData.owner} repo={repoData.name} apiToken={apiToken} onClose={() => setActiveTab('files')} />
+                </div>
+              )}
               
               {/* 克隆标签内容 */}
               {activeTab === 'clone' && (
@@ -1531,6 +1567,7 @@ export default function Home() {
                   <CloneCodeSection repoData={repoData} />
                   <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
                     <p>使用上面的命令将此仓库克隆到您的本地机器。</p>
+                    <p className="mt-2">克隆后，请查看项目根目录下的 <code>good/</code>（含 <code>css/</code> 与 <code>js/</code>），核心功能文件位于 <code>good/js/core.js</code>。</p>
                   </div>
                 </div>
               )}
@@ -1584,5 +1621,106 @@ export default function Home() {
           </div>
         </footer>
      </div>
+  );
+}
+
+// 发行版面板组件
+export function ReleasesPanel({ owner, repo, apiToken, onClose }: { owner: string; repo: string; apiToken: string; onClose?: () => void }) {
+  const { status, error, releases, refresh } = useReleases(owner, repo, apiToken);
+  return (
+    <div className="mt-6 border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-800">
+        <div className="flex items-center">
+          <Tag className="h-4 w-4 mr-2 text-gray-600 dark:text-gray-300" />
+          <span className="font-medium">发行版</span>
+        </div>
+      </div>
+      <div className="bg-white dark:bg-gray-900">
+        {status === 'loading' && (
+          <div className="p-6 text-sm text-gray-700 dark:text-gray-300">正在加载发行版...</div>
+        )}
+        {status === 'error' && (
+          <div className="p-6">
+            <div className="p-4 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg border border-red-200 dark:border-red-800">
+              <div className="flex items-start">
+                <Info className="h-4 w-4 mt-0.5 mr-2" />
+                <div>
+                  <div className="text-sm font-medium">获取发行版失败</div>
+                  <div className="text-sm mt-1">{error}</div>
+                  <button
+                    className="mt-2 px-3 py-1.5 text-sm rounded-md bg-red-600 hover:bg-red-700 text-white"
+                    onClick={refresh}
+                  >
+                    重试
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {status === 'success' && (
+          <div className="divide-y divide-gray-200 dark:divide-gray-800">
+            {releases.length === 0 ? (
+              <div className="p-6 text-sm text-gray-600 dark:text-gray-400">暂无发行版。</div>
+            ) : (
+              releases.map((r) => (
+                <div key={r.id} className="p-6">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                    <div>
+                      <div className="text-lg font-semibold">{r.name || r.tag_name}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">版本：{r.tag_name} · 发布：{new Date(r.published_at).toLocaleString()}</div>
+                      {(r.draft || r.prerelease) && (
+                        <div className="mt-1 text-xs inline-flex items-center px-2 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300">
+                          {r.draft ? '草稿' : '预发布'}
+                        </div>
+                      )}
+                    </div>
+                    <div className="mt-3 md:mt-0 flex flex-wrap gap-2">
+                      <a
+                        href={buildSourceArchiveUrl(owner, repo, r.tag_name, 'zip')}
+                        className="inline-flex items-center px-3 py-1.5 text-sm rounded-md bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        <Download className="h-4 w-4 mr-1" /> 源码 ZIP
+                      </a>
+                      <a
+                        href={buildSourceArchiveUrl(owner, repo, r.tag_name, 'tar.gz')}
+                        className="inline-flex items-center px-3 py-1.5 text-sm rounded-md bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200"
+                      >
+                        <Download className="h-4 w-4 mr-1" /> 源码 TAR.GZ
+                      </a>
+                    </div>
+                  </div>
+                  {r.body ? (
+                    <div className="mt-3">
+                      <div className="prose prose-sm dark:prose-invert max-w-none">
+                        <MarkdownRenderer content={r.body} />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-3 text-sm text-gray-500">无更新说明</div>
+                  )}
+                  {r.assets && r.assets.length > 0 && (
+                    <div className="mt-4">
+                      <div className="text-sm font-medium mb-2">已编译的二进制/附件</div>
+                      <div className="flex flex-wrap gap-2">
+                        {r.assets.map((a) => (
+                          <a
+                            key={a.browser_download_url}
+                            href={a.browser_download_url}
+                            className="inline-flex items-center px-3 py-1.5 text-sm rounded-md bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200"
+                          >
+                            <Download className="h-4 w-4 mr-1" /> {a.name}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

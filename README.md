@@ -90,7 +90,7 @@ MIT License
 
 ## 🆘 帮助
 
-如有问题，请查看 [帮助文档](help/index.html) 或提交Issue。
+如有问题，请查看 [帮助文档]((http://gitinspect.huruiqi.my/help/index.html)) 或提交Issue。
 
 ---
 

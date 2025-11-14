@@ -31,7 +31,7 @@
 2）通过网页上传本项目文件
 - 进入你新建的仓库页面
 - 点击 “uploading an existing file” 或 “Add file → Upload files”
-- 打开你电脑里的这个文件夹：`/Users/anna/Downloads/319309796866/GitHub`
+- 打开你电脑里的这个文件夹：`/GitHub`
 - 把里面的所有文件和文件夹（如 `src/`、`help/`、`package.json` 等）拖到网页里
 - 页面底部填写提交说明（比如 `Initial upload`）→ 点击 “Commit changes” 即完成上传！
 

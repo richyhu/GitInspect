@@ -23,10 +23,8 @@
 
 ```bash
 # 克隆项目
-git clone [你的仓库地址]
+git clone https://github.com/richyhu/GitInspect.git
 
-# 进入项目目录
-cd github1
 
 # 安装依赖
 npm install

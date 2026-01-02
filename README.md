@@ -1,4 +1,5 @@
 # GitHub 仓库浏览器
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/richyhu/GitInspect)
 
 一个简洁优雅的 GitHub 仓库浏览工具，支持查看仓库信息、文件结构、发布版本等功能。
 
